@@ -1,27 +1,51 @@
-# Getting Started
-
-Welcome to your new project.
-
-It contains these folders and files, following our recommended project layout:
-
-File or Folder | Purpose
----------|----------
-`app/` | content for UI frontends goes here
-`db/` | your domain models and data go here
-`srv/` | your service models and code go here
-`package.json` | project metadata and configuration
-`readme.md` | this getting started guide
+# Using Postgresql as DB
 
 
-## Next Steps
-
-- Open a new terminal and run `cds watch`
-- (in VS Code simply choose _**Terminal** > Run Task > cds watch_)
-- Start adding content, for example, a [db/schema.cds](db/schema.cds).
+## Create instance on BTP
 
 
-## Learn More
 
-Learn more at https://cap.cloud.sap/docs/get-started/.
-# cap-postgre-todo
-# cap-postgre-todo
+## npm add @cap-js/postgres
+
+All your files and folders are presented as a tree in the file explorer. You can switch from one to another by clicking a file in the tree.
+
+## cds env requires.db --for production
+
+It should give this output :
+{
+	  impl: '@cap-js/postgres',
+	  dialect: 'postgres',
+	  kind: 'postgres'
+}
+
+## cds add postgres
+
+1.  Adds  `@cap-js/postgres`  dependency to your  _package.json_  `dependencies`.
+2.  Sets up deployment descriptors such as  _mta.yaml_  to use a PostgreSQL instance deployer application.
+3.  Wires up the PostgreSQL service to your deployer app and CAP backend.
+
+## change type in mta
+If it gives error while creating the instance of postgresql on deployment. You should use the existing instance.So, the db module should look like that 
+- name: postgresql-db
+type: org.cloudfoundry.existing-service
+
+# Access DB after Deployment
+
+https://community.sap.com/t5/technology-blogs-by-sap/sap-btp-postgresql-ssh-tunnel-and-ssh-tunneling-explained/ba-p/13563049
+
+## SSH tunnel
+
+```abap
+cf enable-ssh <YOUR-HOST-APP>
+
+cf restage <YOUR-HOST-APP>
+
+cf create-service-key MY-DB EXTERNAL-ACCESS-KEY
+
+cf service-key MY-DB EXTERNAL-ACCESS-KEY
+
+cf ssh -L 63306:<hostname>:<port> YOUR-HOST-APP
+
+psql -d <dbname> -U <username> -p 63306 -h localhost
+```
+All values should be taken from the credentials of postgresql instance in BTP.
