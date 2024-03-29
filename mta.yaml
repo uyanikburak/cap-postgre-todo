@@ -1,0 +1,125 @@
+_schema-version: "3.1"
+ID: cap-postgre-todo
+description: A simple CAP project.
+version: 1.0.0
+modules:
+  - name: cap-postgre-todo-srv
+    type: nodejs
+    path: gen/srv
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    parameters:
+      buildpack: nodejs_buildpack
+    build-parameters:
+      builder: npm
+    requires:
+      - name: postgresql-db
+      - name: uaa_cap-postgre-todo
+  - name: cap-postgre-todo-approuter
+    type: approuter.nodejs
+    path: cap-postgre-todo-approuter
+    requires:
+      - name: cap-postgre-todo_html_repo_runtime
+      - name: uaa_cap-postgre-todo
+      - name: cap-postgre-todo-destination-service
+        group: destinations
+        properties:
+          forwardAuthToken: false
+          name: ui5
+          url: https://ui5.sap.com
+    parameters:
+      disk-quota: 256M
+      memory: 256M
+  - name: cap-postgre-todo_ui_deployer
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: cap-postgre-todo_html_repo_host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - artifacts:
+            - cappostgretodo.zip
+          name: cappostgretodo
+          target-path: resources/
+  - name: cappostgretodo
+    type: html5
+    path: app/cap-postgre-todo
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms:
+        []
+
+  - name: postgresql-db-deployer
+    type: nodejs
+    path: gen/pg
+    parameters:
+      buildpack: nodejs_buildpack
+      no-route: true
+      no-start: true
+      tasks:
+        - name: deploy-to-postgresql
+          command: npm start
+    requires:
+      - name: postgresql-db
+resources:
+  - name: cap-postgre-todo_html_repo_runtime
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-runtime
+  - name: uaa_cap-postgre-todo
+    type: org.cloudfoundry.managed-service
+    parameters:
+      path: ./xs-security.json
+      service: xsuaa
+      service-name: cap-postgre-todo-xsuaa-service
+      service-plan: application
+      config:
+        xsappname: cap-postgre-todo-${org}-${space}
+        tenant-mode: dedicated
+  - name: cap-postgre-todo_html_repo_host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host
+  - name: cap-postgre-todo-destination-service
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        HTML5Runtime_enabled: false
+        init_data:
+          instance:
+            destinations:
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+            existing_destinations_policy: update
+        version: 1.0.0
+      service: destination
+      service-name: cap-postgre-todo-destination-service
+      service-plan: lite
+
+  - name: postgresql-db
+    type: org.cloudfoundry.existing-service
+
+
+parameters:
+  deploy_mode: html5-repo
+  enable-parallel-deployments: true
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production

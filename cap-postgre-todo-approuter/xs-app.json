@@ -1,0 +1,11 @@
+{
+    "authenticationMethod": "route",
+    "routes": [
+      {
+        "source": "^/odata/v4/to-do/(.*)$",
+        "destination": "backend-api",
+        "authenticationType": "xsuaa"
+      }
+    ],
+    "welcomeFile": "/cappostgretodo"
+  }
