@@ -12,3 +12,8 @@ entity Categories {
         task        : Association to many Tasks
                           on task.category = $self;
 }
+
+entity Test {
+    key ID          : UUID;
+        name        : String(50);
+}

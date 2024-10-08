@@ -15,7 +15,7 @@ modules:
     build-parameters:
       builder: npm
     requires:
-      - name: postgresql-db
+      - name: postgre-sql
       - name: uaa_cap-postgre-todo
   - name: cap-postgre-todo-approuter
     type: approuter.nodejs
@@ -58,7 +58,7 @@ modules:
       supported-platforms:
         []
 
-  - name: postgresql-db-deployer
+  - name: postgre-sql-deployer
     type: nodejs
     path: gen/pg
     parameters:
@@ -69,7 +69,7 @@ modules:
         - name: deploy-to-postgresql
           command: npm start
     requires:
-      - name: postgresql-db
+      - name: postgre-sql
 resources:
   - name: cap-postgre-todo_html_repo_runtime
     type: org.cloudfoundry.managed-service
@@ -110,9 +110,8 @@ resources:
       service-name: cap-postgre-todo-destination-service
       service-plan: lite
 
-  - name: postgresql-db
+  - name: postgre-sql
     type: org.cloudfoundry.existing-service
-
 
 parameters:
   deploy_mode: html5-repo

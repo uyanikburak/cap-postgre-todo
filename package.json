@@ -6,7 +6,7 @@
     "license": "UNLICENSED",
     "private": true,
     "dependencies": {
-        "@cap-js/postgres": "^1.6.0",
+        "@cap-js/postgres": "^1.10.0",
         "@sap/cds": "^7",
         "@sap/xssec": "^3",
         "express": "^4"
